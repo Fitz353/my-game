@@ -2,10 +2,19 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 LDFLAGS = -lSDL3
 
-all: mygame
+SRC = main.c game.c
+OBJ = $(SRC:.c=.o)
+EXEC = mygame
 
-mygame: main.c
-	$(CC) $(CFLAGS) -o mygame main.c $(LDFLAGS)
+all: $(EXEC)
+
+$(EXEC): $(OBJ)
+	$(CC) $(OBJ) -o $@ $(LDFLAGS)
+
+%.o: %.c game.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f mygame
+	rm -f $(OBJ) $(EXEC)
+
+.PHONY: all clean
