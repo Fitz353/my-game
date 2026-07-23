@@ -3,6 +3,14 @@
 #define HEIGHT 650
 #define WIDTH 500
 
+//Struct of the player with it's attributes
+typedef struct{
+    float x, y;
+    float width, height;
+    float vel_x, vel_y;
+    SDL_Texture* texture;
+}Player;
+
     
 #include <SDL3/SDL.h>
 #include <stdbool.h>

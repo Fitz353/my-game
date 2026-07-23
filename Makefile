@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
-LDFLAGS = -lSDL3
+LDFLAGS = -lSDL3 -lSDL3_image
 
 SRC = main.c game.c
 OBJ = $(SRC:.c=.o)
