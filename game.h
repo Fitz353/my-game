@@ -1,7 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
-#define HEIGHT 650
-#define WIDTH 500
+#define HEIGHT 900
+#define WIDTH 1600
 
 //Struct of the player with it's attributes
 typedef struct{

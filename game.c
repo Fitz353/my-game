@@ -1,5 +1,8 @@
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_render.h>
 #include <SDL3/SDL_scancode.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3_image/SDL_image.h>
 #include <stdlib.h>
 #include "game.h"
@@ -14,6 +17,7 @@ void Init(SDL_Window** window, SDL_Renderer** renderer){
     if(!SDL_CreateWindowAndRenderer("Cat game", WIDTH, HEIGHT, 0, window, renderer)){//width first, then height
             SDL_Log("Failed: %s", SDL_GetError());
     }
+    SDL_SetRenderVSync(*renderer, 1); //vsync here for framerate, 1 for 60Hz
 }
 
 void Destroy(SDL_Window* window, SDL_Renderer* renderer){
@@ -22,8 +26,9 @@ void Destroy(SDL_Window* window, SDL_Renderer* renderer){
     SDL_Quit();
 }
 
-void HandlePlayerIn(const bool* keys, Player* cat, float speed){
+void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
     
+    speed = speed * dt;
     if(keys[SDL_SCANCODE_LSHIFT] && (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_DOWN])){
         speed*=2;
     }
@@ -74,6 +79,8 @@ void RunGame(SDL_Renderer* renderer){
         SDL_Log("Image fail: %s", SDL_GetError());
     }
 
+    Uint64 last = SDL_GetPerformanceCounter();  //For delta time
+
     while(running){
         while(SDL_PollEvent(&event)){
             if(event.type==SDL_EVENT_QUIT){
@@ -81,10 +88,15 @@ void RunGame(SDL_Renderer* renderer){
             }
         }
         
+        Uint64 now = SDL_GetPerformanceCounter();
+        float dt = (float)(now-last)/(float)SDL_GetPerformanceFrequency();  //Delta time
+        last = now;
+
+
         //making the keyboard movement
         const bool* keys = SDL_GetKeyboardState(NULL);
-        float speed = 2.5;
-        HandlePlayerIn(keys, &cat, speed);      //Make the player move by the arrows
+        float speed = 230.0;
+        HandlePlayerIn(keys, &cat, speed, dt);      //Make the player move by the arrows
         KeepInside(&cat, 0, WIDTH, HEIGHT);     //Keep player in bounds
 
 
