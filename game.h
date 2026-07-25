@@ -7,7 +7,6 @@
 typedef struct{
     float x, y;
     float width, height;
-    float vel_x, vel_y;
     SDL_Texture* texture;
 }Player;
 

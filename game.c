@@ -22,6 +22,42 @@ void Destroy(SDL_Window* window, SDL_Renderer* renderer){
     SDL_Quit();
 }
 
+void HandlePlayerIn(const bool* keys, Player* cat, float speed){
+    
+    if(keys[SDL_SCANCODE_LSHIFT] && (keys[SDL_SCANCODE_LEFT] || keys[SDL_SCANCODE_RIGHT] || keys[SDL_SCANCODE_UP] || keys[SDL_SCANCODE_DOWN])){
+        speed*=2;
+    }
+    if(keys[SDL_SCANCODE_LEFT]){
+        cat->x-=speed;
+    }
+    if(keys[SDL_SCANCODE_RIGHT]){
+        cat->x+=speed;
+    }
+    if(keys[SDL_SCANCODE_UP]){
+        cat->y-=speed;
+    }
+    if(keys[SDL_SCANCODE_DOWN]){
+        cat->y+=speed;
+    }
+    
+}
+
+void KeepInside(Player* player, float min, float max_x, float max_y){
+    //checking the player is still in the window, or where we want
+    if(player->x<min){
+        player->x=min;
+    }
+    if(player->y<min){
+        player->y=min;
+    }
+    if(player->x + player->width>max_x){
+        player->x=max_x - player->width;
+    }
+    if(player->y + player->height>max_y){
+        player->y=max_y - player->height;
+    }
+}
+
 void RunGame(SDL_Renderer* renderer){
     bool running = true;
     SDL_Event event;
@@ -33,7 +69,7 @@ void RunGame(SDL_Renderer* renderer){
     cat.y=100.0;
     cat.width=150.0;
     cat.height=150.0;
-    cat.texture=IMG_LoadTexture(renderer, "cat.png");
+    cat.texture=IMG_LoadTexture(renderer, "assets/cat.png");
     if(!cat.texture){
         SDL_Log("Image fail: %s", SDL_GetError());
     }
@@ -48,19 +84,12 @@ void RunGame(SDL_Renderer* renderer){
         //making the keyboard movement
         const bool* keys = SDL_GetKeyboardState(NULL);
         float speed = 2.5;
+        HandlePlayerIn(keys, &cat, speed);      //Make the player move by the arrows
+        KeepInside(&cat, 0, WIDTH, HEIGHT);     //Keep player in bounds
 
-        if(keys[SDL_SCANCODE_LEFT]){
-            cat.x-=speed;
-        }
-        if(keys[SDL_SCANCODE_RIGHT]){
-            cat.x+=speed;
-        }
-        if(keys[SDL_SCANCODE_UP]){
-            cat.y-=speed;
-        }
-        if(keys[SDL_SCANCODE_DOWN]){
-            cat.y+=speed;
-        }
+
+
+
 
         //setting the default background color to black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);     //here's black
