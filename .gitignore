@@ -1,1 +1,4 @@
 mygame
+*.o
+*.md
+compile_flags.txt
