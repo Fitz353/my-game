@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_scancode.h>
 #include <SDL3_image/SDL_image.h>
 #include <stdlib.h>
 #include "game.h"
@@ -43,6 +44,24 @@ void RunGame(SDL_Renderer* renderer){
                 running=false;	//We stop if the player hits on "X"
             }
         }
+        
+        //making the keyboard movement
+        const bool* keys = SDL_GetKeyboardState(NULL);
+        float speed = 2.5;
+
+        if(keys[SDL_SCANCODE_LEFT]){
+            cat.x-=speed;
+        }
+        if(keys[SDL_SCANCODE_RIGHT]){
+            cat.x+=speed;
+        }
+        if(keys[SDL_SCANCODE_UP]){
+            cat.y-=speed;
+        }
+        if(keys[SDL_SCANCODE_DOWN]){
+            cat.y+=speed;
+        }
+
         //setting the default background color to black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);     //here's black
         SDL_RenderClear(renderer);
