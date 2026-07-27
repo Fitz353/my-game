@@ -11,13 +11,13 @@ int main(int argc, char* argv[]){
     //Initializing window and other stuff
     SDL_Window* window = NULL;
     SDL_Renderer* renderer = NULL;
-    Init(&window, &renderer);
+    GameInit(&window, &renderer);
 
     //Game running and core logic here
     RunGame(renderer);
 
     //Discarding and quitting the game
-    Destroy(window, renderer);
+    GameDestroy(window, renderer);
     return 0;
 }
 

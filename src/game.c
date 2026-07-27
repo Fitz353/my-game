@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include "game.h"
 
-void Init(SDL_Window** window, SDL_Renderer** renderer){
+void GameInit(SDL_Window** window, SDL_Renderer** renderer){
     //Initialisation of video, audio, gamepad is for consoles
     if(!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD)){
         SDL_Log("SDL_Init failed: %s", SDL_GetError());
@@ -21,13 +21,11 @@ void Init(SDL_Window** window, SDL_Renderer** renderer){
     SDL_SetRenderVSync(*renderer, 1); //vsync here for framerate, 1 for 60Hz
 }
 
-void Destroy(SDL_Window* window, SDL_Renderer* renderer){
+void GameDestroy(SDL_Window* window, SDL_Renderer* renderer){
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
-
-
 
 void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
     
@@ -40,53 +38,60 @@ void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
     bool down = keys[SDL_SCANCODE_DOWN];
     bool moving = left || right || up || down;
 
+    bool can_left = left && (cat->x + cat->col_offset_x > 0);
+    bool can_right = right && (cat->x + cat->col_offset_x + cat->col_width < WIDTH);
+    bool can_up = up && (cat->y + cat->col_offset_y > 0);
+    bool can_down = down && (cat->y + cat->col_offset_y + cat->col_height < HEIGHT);
+
+
+
     //Running
     if(shift && moving){
         speed*=2;
     }
 
     //Movement
-    if(left){
+    if(can_left){
         cat->x-=speed;
         cat->last_facing=FACING_LEFT;
     }
-    if(right){
+    if(can_right){
         cat->x+=speed;
         cat->last_facing=FACING_RIGHT;
     }
-    if(up){
+    if(can_up){
         cat->y-=speed;
         cat->last_facing=FACING_UP;
     }
-    if(down){
+    if(can_down){
         cat->y+=speed;
         cat->last_facing=FACING_DOWN;
     }
 
     PlayerState new_state;
     //Whats the next state
-    if(left && shift){
+    if(can_left && shift){
         new_state=STATE_RUN_LEFT;
     }
-    else if(right && shift){
+    else if(can_right && shift){
         new_state=STATE_RUN_RIGHT;
     }
-    else if (up && shift){
+    else if (can_up && shift){
         new_state=STATE_RUN_UP;
     }
-    else if (down && shift){
+    else if (can_down && shift){
         new_state = STATE_RUN_DOWN;
     }
-    else if (left){
+    else if (can_left){
         new_state=STATE_WALK_LEFT;
     }
-    else if (right){
+    else if (can_right){
         new_state = STATE_WALK_RIGHT;
     }
-    else if (up){
+    else if (can_up){
         new_state=STATE_WALK_UP;
     }
-    else if (down){
+    else if (can_down){
         new_state=STATE_WALK_DOWN;
     }
     else{
@@ -112,18 +117,18 @@ void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
 }
 
 void KeepInside(Player* player, float min, float max_x, float max_y){
-    //checking the player is still in the window, or where we want
-    if(player->x<min){
-        player->x=min;
+    //checking the player is still in the window, or where we want, added collision boxes
+    if(player->x + player->col_offset_x<min){ //left
+        player->x=min  - player->col_offset_x;
     }
-    if(player->y<min){
-        player->y=min;
+    if(player->y + player->col_offset_y<min){ //top
+        player->y=min - player->col_offset_y;
     }
-    if(player->x + player->width>max_x){
-        player->x=max_x - player->width;
+    if(player->x + player->col_offset_x + player->col_width>max_x){ //right
+        player->x=max_x - player->col_width - player->col_offset_x;
     }
-    if(player->y + player->height>max_y){
-        player->y=max_y - player->height;
+    if(player->y + player->col_offset_y + player->col_height>max_y){  //down
+        player->y=max_y - player->col_height - player->col_offset_y;
     }
 }
 
@@ -137,7 +142,11 @@ void RunGame(SDL_Renderer* renderer){
             .x = 100.0,                                                      
             .y = 100.0,                                                      
             .width = 192.0,                                                  
-            .height = 192.0,                                                 
+            .height = 192.0,
+            .col_offset_x = 48.0f,
+            .col_offset_y= 48.0f,
+            .col_width=97.0f,
+            .col_height=97.0f,
             .current_frame = 0,                                              
             .current_row = 19,                                               
             .total_frames = 5,                                               
@@ -186,7 +195,7 @@ void RunGame(SDL_Renderer* renderer){
 
         //making the keyboard movement
         const bool* keys = SDL_GetKeyboardState(NULL);
-        float speed = 230.0;
+        float speed = CAT_SPEED;
         HandlePlayerIn(keys, &cat, speed, dt);      //Make the player move by the arrows
         KeepInside(&cat, 0, WIDTH, HEIGHT);     //Keep player in bounds
         
@@ -196,9 +205,6 @@ void RunGame(SDL_Renderer* renderer){
             cat.anim_timer=0;
         }
 
-
-
-
         //setting the default background color to black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);     //here's black
         SDL_RenderClear(renderer);
@@ -207,6 +213,16 @@ void RunGame(SDL_Renderer* renderer){
         SDL_FRect src = {cat.current_frame * 64, cat.current_row * 64, 64, 64};
         SDL_FRect dest = {cat.x, cat.y, cat.width, cat.height};     //Float rectangle, position and how big
         SDL_RenderTexture(renderer, cat.texture, &src, &dest);
+
+        // --- DEBUG COLLISION BOX (OPTIONAL) ---
+        SDL_FRect debug_col = {
+        cat.x + cat.col_offset_x,
+        cat.y + cat.col_offset_y,
+        cat.col_width,
+        cat.col_height
+        };
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red box
+        SDL_RenderRect(renderer, &debug_col);
 
 
 

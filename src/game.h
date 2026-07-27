@@ -2,6 +2,7 @@
 #define GAME_H
 #define HEIGHT 900
 #define WIDTH 1600
+#define CAT_SPEED 230.0f
 
 //Struct of the player with it's attributes
 #include <SDL3/SDL.h>
@@ -40,14 +41,16 @@ typedef struct{
     int total_frames;
     float anim_timer;
     float anim_speed;
+    float col_offset_x, col_offset_y;   //both for collision
+    float col_width, col_height;
     PlayerState direction; 
     FacingDir last_facing;
     AnimData anims[STATE_RUN_DOWN+1];
     AnimData idle[FACING_UP+1];
 }Player;
 
-    void Init(SDL_Window** window, SDL_Renderer** renderer);
-    void Destroy(SDL_Window* window, SDL_Renderer* renderer);
+    void GameInit(SDL_Window** window, SDL_Renderer** renderer);
+    void GameDestroy(SDL_Window* window, SDL_Renderer* renderer);
     void RunGame(SDL_Renderer* renderer);
 
 #endif
