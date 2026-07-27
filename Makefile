@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 LDFLAGS = -lSDL3 -lSDL3_image
 
-SRC = main.c game.c
-OBJ = $(SRC:.c=.o)
+SRC = src/main.c src/game.c
+OBJ = $(SRC:src/%.c=build/%.o)
 EXEC = mygame
 
 all: $(EXEC)
@@ -11,8 +11,11 @@ all: $(EXEC)
 $(EXEC): $(OBJ)
 	$(CC) $(OBJ) -o $@ $(LDFLAGS)
 
-%.o: %.c game.h
+build/%.o: src/%.c src/game.h | build
 	$(CC) $(CFLAGS) -c $< -o $@
+
+build:
+	mkdir -p build
 
 clean:
 	rm -f $(OBJ) $(EXEC)

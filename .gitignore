@@ -1,4 +1,4 @@
 mygame
-*.o
+build/
 *.md
 compile_flags.txt
