@@ -27,6 +27,8 @@ void Destroy(SDL_Window* window, SDL_Renderer* renderer){
     SDL_Quit();
 }
 
+
+
 void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
     
     speed = speed * dt;
@@ -96,71 +98,18 @@ void HandlePlayerIn(const bool* keys, Player* cat, float speed, float dt){
         cat->current_frame=0;
         cat->anim_timer=0.0;
 
-        switch(new_state){                                               
-                case STATE_IDLE:                                             
-                    switch(cat->last_facing){                                
-                        case FACING_LEFT:  cat->current_row = 21; break;    
-                        case FACING_RIGHT: cat->current_row = 22; break;    
-                        case FACING_UP:    cat->current_row = 20; break;    
-                        default:           cat->current_row = 19;  break;    
-                    }                                                        
-                    cat->total_frames = 5;                                  
-                    cat->anim_speed = 0.3;                                   
-                    break;                                                   
-                case STATE_WALK_LEFT:                                        
-                    cat->current_row = 4;                                    
-                    cat->total_frames = 6;                                   
-                    cat->anim_speed = 0.2;                                   
-                    break;                                                   
-                case STATE_WALK_RIGHT:                                       
-                    cat->current_row = 5;                                  
-                    cat->total_frames = 6;                                 
-                    cat->anim_speed = 0.2;                                   
-                    break;                                                   
-                case STATE_WALK_UP:                                          
-                    cat->current_row = 3;                                  
-                    cat->total_frames = 6;                                 
-                    cat->anim_speed = 0.2;                                   
-                    break;                                                   
-                case STATE_WALK_DOWN:                                        
-                    cat->current_row = 2;                                  
-                    cat->total_frames = 6;                                 
-                    cat->anim_speed = 0.2;                                   
-                    break;                                                   
-                case STATE_RUN_LEFT:                                         
-                    cat->current_row = 11;                                  
-                    cat->total_frames = 5;                                 
-                    cat->anim_speed = 0.1;                                   
-                    break;                                                   
-                case STATE_RUN_RIGHT:                                        
-                    cat->current_row = 10;
-                    cat->total_frames = 5;
-                    cat->anim_speed = 0.1;  
-                    break;
-                case STATE_RUN_UP:
-                    cat->current_row = 9;
-                    cat->total_frames = 4;
-                    cat->anim_speed = 0.1;  
-                    break;
-                case STATE_RUN_DOWN:
-                    cat->current_row = 8;
-                    cat->total_frames = 4;
-                    cat->anim_speed = 0.1;  
-                    break;
-            }             
+        AnimData anim;
+            if(new_state == STATE_IDLE){
+                anim = cat->idle[cat->last_facing];
+            } else {
+                anim = cat->anims[new_state];
+            }
+  
+            cat->current_row = anim.row;
+            cat->total_frames = anim.total_frames;
+            cat->anim_speed = anim.anim_speed;             
         }
 }
-
-
-
-
-
-
-
-
-
-
-  
 
 void KeepInside(Player* player, float min, float max_x, float max_y){
     //checking the player is still in the window, or where we want
@@ -184,20 +133,37 @@ void RunGame(SDL_Renderer* renderer){
     //Main game loop
 
     //Declaration of cat
-    Player cat;
-    cat.x=100.0;
-    cat.y=100.0;
-    cat.width=192.0;
-    cat.height=192.0;
-    cat.current_frame=0;
-    cat.current_row=37; 
-    cat.total_frames=11;
-    cat.anim_timer=0.0;
-    cat.anim_speed=0.3;  //0.3 good speed for 11 frames
-    cat.direction = STATE_IDLE;  //for idle
-    cat.last_facing=FACING_DOWN;  //for idle
+    Player cat = {                                                       
+            .x = 100.0,                                                      
+            .y = 100.0,                                                      
+            .width = 192.0,                                                  
+            .height = 192.0,                                                 
+            .current_frame = 0,                                              
+            .current_row = 19,                                               
+            .total_frames = 5,                                               
+            .anim_timer = 0.0,                                               
+            .anim_speed = 0.3,                                               
+            .direction = STATE_IDLE,                                         
+            .last_facing = FACING_DOWN,                                      
+            .anims = {                                                       
+                [STATE_WALK_LEFT]  = {4, 6, 0.2},                            
+                [STATE_WALK_RIGHT] = {5, 6, 0.2},
+                [STATE_WALK_UP]    = {3, 6, 0.2},
+                [STATE_WALK_DOWN]  = {2, 6, 0.2},
+                [STATE_RUN_LEFT]   = {11, 5, 0.1},
+                [STATE_RUN_RIGHT]  = {10, 5, 0.1},
+                [STATE_RUN_UP]     = {9, 4, 0.1},
+                [STATE_RUN_DOWN]   = {8, 4, 0.1},
+            },
+            .idle = {
+                [FACING_DOWN]  = {19, 5, 0.3},
+                [FACING_LEFT]  = {21, 5, 0.3},
+                [FACING_RIGHT] = {22, 5, 0.3},
+                [FACING_UP]    = {20, 5, 0.3},
+            },
+        };
 
-    cat.texture=IMG_LoadTexture(renderer, "assets/cat_sheet.png");
+    cat.texture=IMG_LoadTexture(renderer, "assets/fred_cat.png");
     
     if(!cat.texture){
         SDL_Log("Image fail: %s", SDL_GetError());

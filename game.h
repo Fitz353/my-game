@@ -26,9 +26,11 @@ typedef enum{
     FACING_UP,
 }FacingDir;
 
-
-
-
+typedef struct{
+    int row;
+    int total_frames;
+    float anim_speed;
+}AnimData;
 
 typedef struct{
     float x, y;
@@ -40,6 +42,8 @@ typedef struct{
     float anim_speed;
     PlayerState direction; 
     FacingDir last_facing;
+    AnimData anims[STATE_RUN_DOWN+1];
+    AnimData idle[FACING_UP+1];
 }Player;
 
     void Init(SDL_Window** window, SDL_Renderer** renderer);
