@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c99
 LDFLAGS = -lSDL3 -lSDL3_image
 
-SRC = src/main.c src/game.c
+SRC = src/main.c src/game.c src/player.c
 OBJ = $(SRC:src/%.c=build/%.o)
 EXEC = mygame
 
