@@ -5,8 +5,8 @@
 
 Player PlayerInit(SDL_Renderer* renderer) { //this function is for the player cat for now
         Player player = {
-            .x = 100.0f,
-            .y = 100.0f,
+            .x = 763.0f,
+            .y = 338.5f,
             .width = 128.0f,
             .height = 128.0f,
             .col_offset_x = 44.0f,
