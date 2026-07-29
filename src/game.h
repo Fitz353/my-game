@@ -2,7 +2,7 @@
 #define GAME_H
 #define HEIGHT 900
 #define WIDTH 1600
-#define CAT_SPEED 230.0f
+
 
 //Struct of the player with it's attributes
 #include <SDL3/SDL.h>

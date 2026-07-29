@@ -1,4 +1,6 @@
+.vscode/
 mygame
+*.exe
 build/
 *.md
 compile_flags.txt

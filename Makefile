@@ -16,8 +16,9 @@ build/%.o: src/%.c src/game.h | build
 
 build:
 	mkdir -p build
+	@rm -rf -- -p 2>/dev/null || true
 
 clean:
-	rm -f $(OBJ) $(EXEC)
+	rm -rf build $(EXEC)
 
 .PHONY: all clean

@@ -2,7 +2,7 @@
 #include "player.h"
 #include "game.h"  
 
-Player PlayerInit(SDL_Renderer* renderer) {
+Player PlayerInit(SDL_Renderer* renderer) { //this function is for the player cat for now
         Player player = {
             .x = 100.0f,
             .y = 100.0f,
@@ -61,6 +61,26 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
         bool can_up    = up    && (player->y + player->col_offset_y > 0);
         bool can_down  = down  && (player->y + player->col_offset_y + player->col_height < HEIGHT);
     
+        //For not blocking the movement if both keys are pressed
+        if(can_left && can_right){
+            if(player->last_facing==FACING_LEFT){
+                can_right=false;
+            }
+            else{
+                can_left=false;
+            }
+        }
+
+        if(can_up && can_down){
+            if(player->last_facing==FACING_DOWN){
+                can_up=false;
+            }
+            else{
+                can_down=false;
+            }
+        }
+
+        //Actual movement
         if (shift && moving) {
             speed *= 2;
         }
@@ -81,7 +101,8 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
             player->y += speed;
             player->last_facing = FACING_DOWN;
         }
-    
+        
+        //For checking the last facing direction, animation, etc.
         PlayerState new_state;
         if (can_left && shift)      new_state = STATE_RUN_LEFT;
         else if (can_right && shift) new_state = STATE_RUN_RIGHT;

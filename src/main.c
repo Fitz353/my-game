@@ -20,18 +20,3 @@ int main(int argc, char* argv[]){
     GameDestroy(window, renderer);
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

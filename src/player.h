@@ -18,7 +18,7 @@ typedef enum{
 }PlayerState;
 
 typedef enum{
-    FACING_DOWN,//idle
+    FACING_DOWN,    //idle
     FACING_LEFT,
     FACING_RIGHT,
     FACING_UP,
@@ -39,10 +39,10 @@ typedef struct{
     float anim_timer;
     float anim_speed;
     float col_offset_x, col_offset_y;   //both for collision
-    float col_width, col_height;
+    float col_width, col_height;    //collision box delimiters
     PlayerState direction; 
     FacingDir last_facing;
-    AnimData anims[STATE_RUN_DOWN+1];
+    AnimData anims[STATE_RUN_DOWN+1];   //+1 because enum uses 0-indexing
     AnimData idle[FACING_UP+1];
 }Player;
 
