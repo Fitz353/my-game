@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "game.h"
 #include "player.h"
+#include "map.h"
 
 void GameInit(SDL_Window** window, SDL_Renderer** renderer){
     //Initialisation of video, audio, gamepad is for consoles
@@ -32,10 +33,12 @@ void RunGame(SDL_Renderer* renderer){
     
     bool running = true;
     SDL_Event event;
+    MapLoad("tiled/map.tmj", renderer);
 
     //Declaration of cat
     Player cat = PlayerInit(renderer);
     Uint64 last = SDL_GetPerformanceCounter();  //For delta time
+    
 
     while(running){
         while(SDL_PollEvent(&event)){
@@ -57,12 +60,15 @@ void RunGame(SDL_Renderer* renderer){
         //setting the default background color to black
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);     //here's black
         SDL_RenderClear(renderer);
+
+        MapRender(renderer, (float)WIDTH, (float)HEIGHT);
         PlayerRender(&cat, renderer);
         
         //OTHER GAME LOGIC HERE
         
         SDL_RenderPresent(renderer);
     }
+
     PlayerDestroy(&cat);
-    SDL_DestroyTexture(cat.texture);
+    MapDestroy();
 }
