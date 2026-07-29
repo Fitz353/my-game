@@ -5,14 +5,14 @@
 
 Player PlayerInit(SDL_Renderer* renderer) { //this function is for the player cat for now
         Player player = {
-            .x = 763.0f,
-            .y = 338.5f,
+            .x = 762.7f,
+            .y = 422.0f,
             .width = 128.0f,
             .height = 128.0f,
-            .col_offset_x = 44.0f,
-            .col_offset_y = 60.0f,
-            .col_width = 40.0f,
-            .col_height = 30.0f,
+            .col_offset_x = 48.0f,
+            .col_offset_y = 70.0f,
+            .col_width = 32.0f,
+            .col_height = 24.0f,
             .current_frame = 0,
             .current_row = 19,
             .total_frames = 5,
@@ -47,7 +47,7 @@ Player PlayerInit(SDL_Renderer* renderer) { //this function is for the player ca
         return player;
     }
 
-void PlayerUpdate(Player* player, const bool* keys, float dt){
+void PlayerUpdate(Player* player, const bool* keys, float dt, float world_w, float world_h){
         float speed = CAT_SPEED * dt;
 
         bool shift = keys[SDL_SCANCODE_LSHIFT];
@@ -62,9 +62,9 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
         }
 
         bool can_left  = left  && (player->x + player->col_offset_x > 0);
-        bool can_right = right && (player->x + player->col_offset_x + player->col_width < WIDTH);
+        bool can_right = right && (player->x + player->col_offset_x + player->col_width < world_w);
         bool can_up    = up    && (player->y + player->col_offset_y > 0);
-        bool can_down  = down  && (player->y + player->col_offset_y + player->col_height < HEIGHT);
+        bool can_down  = down  && (player->y + player->col_offset_y + player->col_height < world_h);
 
         if(can_left && can_right){
             if(player->last_facing==FACING_LEFT) can_right=false;
@@ -84,7 +84,7 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
 
         // Slide X
         if (!MapCheckCollision(next_x + player->col_offset_x, player->y + player->col_offset_y, player->col_width,
-  player->col_height, (float)WIDTH, (float)HEIGHT)) {
+  player->col_height, (float)world_w, (float)world_h)) {
             player->x = next_x;
             if (can_left) moved_left = true;
             if (can_right) moved_right = true;
@@ -95,7 +95,7 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
 
         // Slide Y
         if (!MapCheckCollision(player->x + player->col_offset_x, next_y + player->col_offset_y, player->col_width,
-  player->col_height, (float)WIDTH, (float)HEIGHT)) {
+  player->col_height, (float)world_w, (float)world_h)) {
             player->y = next_y;
             if (can_up) moved_up = true;
             if (can_down) moved_down = true;
@@ -127,9 +127,9 @@ void PlayerUpdate(Player* player, const bool* keys, float dt){
         // Keep Inside boundary check
         if (player->x + player->col_offset_x < 0) player->x = 0 - player->col_offset_x;
         if (player->y + player->col_offset_y < 0) player->y = 0 - player->col_offset_y;
-        if (player->x + player->col_offset_x + player->col_width > WIDTH) player->x = WIDTH - player->col_width -
+        if (player->x + player->col_offset_x + player->col_width > world_w) player->x = world_w - player->col_width -
   player->col_offset_x;
-        if (player->y + player->col_offset_y + player->col_height > HEIGHT) player->y = HEIGHT - player->col_height -
+        if (player->y + player->col_offset_y + player->col_height > world_h) player->y = world_h - player->col_height -
   player->col_offset_y;
 
         player->anim_timer += dt;

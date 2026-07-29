@@ -146,3 +146,6 @@ bool MapCheckCollision(float x, float y, float w, float h, float target_w, float
         }
         return false;
     }    
+    
+    int MapGetTileCols(void) { return g_map ? g_map->width : 30; }
+    int MapGetTileRows(void) { return g_map ? g_map->height : 20; }

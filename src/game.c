@@ -33,7 +33,7 @@ void RunGame(SDL_Renderer* renderer){
     
     bool running = true;
     SDL_Event event;
-    MapLoad("tiled/map.tmj", renderer);
+    MapLoad("tiled/map2.tmj", renderer);
 
     //Declaration of cat
     Player cat = PlayerInit(renderer);
@@ -56,31 +56,43 @@ void RunGame(SDL_Renderer* renderer){
         const bool* keys = SDL_GetKeyboardState(NULL);
         
         //Lifetime of player cat
-        PlayerUpdate(&cat, keys, dt);
         
-        float zoom = 2.0f;
+        // 1.666f keeps your current look. Make bigger if you want bigger world scale.
+            float map_scale = 1.666f;
+            float world_w = MapGetTileCols() * 32.0f * map_scale;
+            float world_h = MapGetTileRows() * 32.0f * map_scale;
+
+            PlayerUpdate(&cat, keys, dt, world_w, world_h);
+
+            float zoom = 2.0f;
             float view_w = WIDTH / zoom;
             float view_h = HEIGHT / zoom;
 
             float cam_x = cat.x + (cat.width / 2.0f) - (view_w / 2.0f);
             float cam_y = cat.y + (cat.height / 2.0f) - (view_h / 2.0f);
 
-            float max_x = WIDTH - view_w;
-            float max_y = HEIGHT - view_h;
-            if (max_x < 0) max_x = 0;
-            if (max_y < 0) max_y = 0;
-            if (cam_x < 0) cam_x = 0;
-            if (cam_y < 0) cam_y = 0;
-            if (cam_x > max_x) cam_x = max_x;
-            if (cam_y > max_y) cam_y = max_y;
+            // Clamping or Centering
+            if (world_w < view_w) cam_x = -(view_w - world_w) / 2.0f; // Center small rooms
+            else {
+                float max_x = world_w - view_w;
+                if (cam_x < 0) cam_x = 0;
+                if (cam_x > max_x) cam_x = max_x;
+            }
+
+            if (world_h < view_h) cam_y = -(view_h - world_h) / 2.0f; // Center small rooms
+            else {
+                float max_y = world_h - view_h;
+                if (cam_y < 0) cam_y = 0;
+                if (cam_y > max_y) cam_y = max_y;
+            }
 
             SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
             SDL_RenderClear(renderer);
 
-            MapRender(renderer, (float)WIDTH, (float)HEIGHT, cam_x, cam_y, zoom, false); // Draw ground layers
-            PlayerRender(&cat, renderer, cam_x, cam_y, zoom);                            // Draw cat
-            MapRender(renderer, (float)WIDTH, (float)HEIGHT, cam_x, cam_y, zoom, true);  // Draw crown layer
-        
+            MapRender(renderer, world_w, world_h, cam_x, cam_y, zoom, false);
+            PlayerRender(&cat, renderer, cam_x, cam_y, zoom);
+            MapRender(renderer, world_w, world_h, cam_x, cam_y, zoom, true);
+
         //OTHER GAME LOGIC HERE
         
         SDL_RenderPresent(renderer);
