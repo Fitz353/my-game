@@ -57,12 +57,29 @@ void RunGame(SDL_Renderer* renderer){
         
         //Lifetime of player cat
         PlayerUpdate(&cat, keys, dt);
-        //setting the default background color to black
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);     //here's black
-        SDL_RenderClear(renderer);
+        
+        float zoom = 2.0f;
+            float view_w = WIDTH / zoom;
+            float view_h = HEIGHT / zoom;
 
-        MapRender(renderer, (float)WIDTH, (float)HEIGHT);
-        PlayerRender(&cat, renderer);
+            float cam_x = cat.x + (cat.width / 2.0f) - (view_w / 2.0f);
+            float cam_y = cat.y + (cat.height / 2.0f) - (view_h / 2.0f);
+
+            float max_x = WIDTH - view_w;
+            float max_y = HEIGHT - view_h;
+            if (max_x < 0) max_x = 0;
+            if (max_y < 0) max_y = 0;
+            if (cam_x < 0) cam_x = 0;
+            if (cam_y < 0) cam_y = 0;
+            if (cam_x > max_x) cam_x = max_x;
+            if (cam_y > max_y) cam_y = max_y;
+
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
+
+            MapRender(renderer, (float)WIDTH, (float)HEIGHT, cam_x, cam_y, zoom, false); // Draw ground layers
+            PlayerRender(&cat, renderer, cam_x, cam_y, zoom);                            // Draw cat
+            MapRender(renderer, (float)WIDTH, (float)HEIGHT, cam_x, cam_y, zoom, true);  // Draw crown layer
         
         //OTHER GAME LOGIC HERE
         

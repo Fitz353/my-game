@@ -48,7 +48,7 @@ typedef struct{
 
 Player PlayerInit(SDL_Renderer* renderer);
 void PlayerUpdate(Player* player, const bool* keys, float dt);
-void PlayerRender(Player* player, SDL_Renderer* renderer);
+void PlayerRender(Player* player, SDL_Renderer* renderer, float cam_x, float cam_y, float zoom);
 void PlayerDestroy(Player* player);
 
 #endif

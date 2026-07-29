@@ -52,20 +52,22 @@ typedef struct cute_tiled_chunk_t cute_tiled_chunk_t;
         }
     }
 
-    void MapRender(SDL_Renderer* renderer, float target_w, float target_h) {
+    void MapRender(SDL_Renderer* renderer, float target_w, float target_h, float cam_x, float cam_y, float zoom, bool render_tops) {
         if (!g_map) return;
 
-        // Compute exact map pixel size from loaded JSON
         float map_w = (float)(g_map->width * g_map->tilewidth);
         float map_h = (float)(g_map->height * g_map->tileheight);
-
-        // Scale factor to fit target
         float sx = target_w / map_w;
         float sy = target_h / map_h;
 
         cute_tiled_layer_t* layer = g_map->layers;
         while (layer) {
-            if (strcmp(layer->type.ptr, "tilelayer") == 0) {
+            if (strcmp(layer->type.ptr, "tilelayer") == 0 && layer->visible == 1) {
+                 bool is_top = (strcmp(layer->name.ptr, "Tops") == 0);
+                if (is_top != render_tops) {
+                    layer = layer->next;
+                    continue;
+                }
                 int* data = layer->data;
                 for (int y = 0; y < layer->height; y++) {
                     for (int x = 0; x < layer->width; x++) {
@@ -76,10 +78,7 @@ typedef struct cute_tiled_chunk_t cute_tiled_chunk_t;
 
                         TilesetTex* ts = NULL;
                         for (int i = g_num_tilesets - 1; i >= 0; i--) {
-                            if (pure_gid >= g_tilesets[i].firstgid) {
-                                ts = &g_tilesets[i];
-                                break;
-                            }
+                            if (pure_gid >= g_tilesets[i].firstgid) { ts = &g_tilesets[i]; break; }
                         }
 
                         if (ts && ts->tex) {
@@ -89,12 +88,12 @@ typedef struct cute_tiled_chunk_t cute_tiled_chunk_t;
 
                             SDL_FRect src = {(float)tx, (float)ty, (float)ts->tilewidth, (float)ts->tileheight};
 
-                            // Apply dynamic scale to destination rect
+                            // Scale map to 1600x900 world first, then apply camera & zoom
                             SDL_FRect dst = {
-                                (x * g_map->tilewidth) * sx,
-                                (y * g_map->tileheight) * sy,
-                                g_map->tilewidth * sx,
-                                g_map->tileheight * sy
+                                ((x * g_map->tilewidth * sx) - cam_x) * zoom,
+                                ((y * g_map->tileheight * sy) - cam_y) * zoom,
+                                (g_map->tilewidth * sx) * zoom,
+                                (g_map->tileheight * sy) * zoom
                             };
 
                             SDL_RenderTexture(renderer, ts->tex, &src, &dst);
@@ -118,3 +117,32 @@ typedef struct cute_tiled_chunk_t cute_tiled_chunk_t;
         cute_tiled_free_map(g_map);
         g_map = NULL;
     }
+
+bool MapCheckCollision(float x, float y, float w, float h, float target_w, float target_h) {
+        if (!g_map) return false;
+        float sx = target_w / (g_map->width * g_map->tilewidth);
+        float sy = target_h / (g_map->height * g_map->tileheight);
+        float tile_w = g_map->tilewidth * sx;
+        float tile_h = g_map->tileheight * sy;
+
+        int start_col = (int)(x / tile_w);
+        int end_col = (int)((x + w) / tile_w);
+        int start_row = (int)(y / tile_h);
+        int end_row = (int)((y + h) / tile_h);
+
+        cute_tiled_layer_t* layer = g_map->layers;
+        while (layer) {
+            if (strcmp(layer->name.ptr, "Collision") == 0) {
+                int* data = layer->data;
+                for (int r = start_row; r <= end_row; r++) {
+                    for (int c = start_col; c <= end_col; c++) {
+                        if (r >= 0 && r < layer->height && c >= 0 && c < layer->width) {
+                            if (data[r * layer->width + c] != 0) return true;
+                        }
+                    }
+                }
+            }
+            layer = layer->next;
+        }
+        return false;
+    }    
